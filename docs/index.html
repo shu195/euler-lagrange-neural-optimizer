@@ -3,128 +3,179 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Euler-Lagrange Neural Optimizer – Interactive Phase-Space Laboratory</title>
+<title>Euler-Lagrange Parameter Dynamics – High-Precision Physical Laboratory</title>
 <style>
   :root {
-    --bg-primary: #05070a;
-    --bg-surface: #0c1017;
-    --bg-card: #131922;
-    --border-subtle: #212836;
-    --border-highlight: #343f54;
-    --text-primary: #f0f6fc;
-    --text-secondary: #8b949e;
-    --text-muted: #535c68;
-    --color-sgd: #ff5252;
-    --color-hb: #c084fc;
-    --color-br: #38bdf8;
-    --color-sv: #fb923c;
-    --color-rel: #4ade80;
+    --bg-base: #000000;
+    --bg-surface: #07090e;
+    --bg-panel: #0d121c;
+    --border-subtle: #192233;
+    --border-bright: #2d3b52;
+    --text-main: #f0f6fc;
+    --text-dim: #7d8795;
+    --text-mono: #a5b4fc;
+    
+    --c-sgd: #f87171;
+    --c-hb: #c084fc;
+    --c-br: #38bdf8;
+    --c-sv: #fb923c;
+    --c-rel: #4ade80;
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body {
-    background: var(--bg-primary);
-    color: var(--text-primary);
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, monospace;
-    font-size: 12px;
-    line-height: 1.5;
-    padding: 16px;
+    background: var(--bg-base);
+    color: var(--text-main);
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, monospace;
+    font-size: 11px;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    min-height: 100vh;
     display: flex;
     flex-direction: column;
     align-items: center;
-    min-height: 100vh;
+    padding: 16px;
   }
   header {
     width: 100%;
-    max-width: 1200px;
+    max-width: 1240px;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 16px;
     padding-bottom: 12px;
+    margin-bottom: 14px;
     border-bottom: 1px solid var(--border-subtle);
   }
-  .header-titles h1 {
-    font-size: 18px;
+  .title-group h1 {
+    font-size: 15px;
     font-weight: 700;
     letter-spacing: -0.3px;
     display: flex;
     align-items: center;
     gap: 8px;
   }
-  .header-titles p {
-    color: var(--text-secondary);
-    font-size: 12px;
+  .badge-tag {
+    font-size: 10px;
+    font-weight: 700;
+    padding: 2px 7px;
+    border-radius: 10px;
+    background: rgba(74, 222, 128, 0.1);
+    border: 1px solid rgba(74, 222, 128, 0.35);
+    color: var(--c-rel);
+    letter-spacing: 0.3px;
   }
-  .badge {
-    background: rgba(74, 222, 128, 0.12);
-    color: var(--color-rel);
-    border: 1px solid rgba(74, 222, 128, 0.3);
-    padding: 2px 8px;
-    border-radius: 12px;
+  .header-sub {
+    font-size: 11px;
+    color: var(--text-dim);
+    margin-top: 2px;
+  }
+  .git-btn {
+    background: var(--bg-panel);
+    color: var(--text-main);
+    border: 1px solid var(--border-bright);
+    padding: 5px 12px;
+    border-radius: 5px;
     font-size: 11px;
     font-weight: 600;
+    cursor: pointer;
+    text-decoration: none;
+    transition: all 0.15s ease;
   }
-  .main-layout {
-    width: 100%;
-    max-width: 1200px;
-    display: grid;
-    grid-template-columns: 560px 1fr;
-    gap: 16px;
-  }
-  @media (max-width: 1024px) {
-    .main-layout { grid-template-columns: 1fr; }
+  .git-btn:hover {
+    background: #151e2d;
+    border-color: #4a5d7c;
   }
 
-  /* Left Panel: Landscape Canvas */
-  .canvas-card {
+  /* Main Grid Layout */
+  .workbench {
+    width: 100%;
+    max-width: 1240px;
+    display: grid;
+    grid-template-columns: 620px 1fr;
+    gap: 16px;
+  }
+  @media (max-width: 1080px) {
+    .workbench { grid-template-columns: 1fr; }
+  }
+
+  /* Left Viewport Card */
+  .viewport-card {
     background: var(--bg-surface);
     border: 1px solid var(--border-subtle);
-    border-radius: 10px;
+    border-radius: 8px;
     padding: 12px;
     display: flex;
     flex-direction: column;
     gap: 10px;
   }
-  .canvas-header {
+  .toolbar {
     display: flex;
     justify-content: space-between;
     align-items: center;
   }
-  .viewport-container {
+  .tool-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  select, button {
+    background: var(--bg-panel);
+    color: var(--text-main);
+    border: 1px solid var(--border-subtle);
+    padding: 5px 9px;
+    border-radius: 5px;
+    font-size: 11px;
+    outline: none;
+    cursor: pointer;
+    font-family: inherit;
+    transition: all 0.15s ease;
+  }
+  select:hover, button:hover {
+    border-color: var(--border-bright);
+    background: #141b28;
+  }
+  button.btn-primary {
+    background: rgba(56, 189, 248, 0.12);
+    border-color: rgba(56, 189, 248, 0.4);
+    color: #e0f2fe;
+    font-weight: 600;
+  }
+  .canvas-stage {
     position: relative;
     width: 100%;
-    height: 480px;
+    height: 520px;
     background: #000;
     border: 1px solid var(--border-subtle);
-    border-radius: 8px;
+    border-radius: 6px;
     overflow: hidden;
     cursor: crosshair;
   }
-  canvas#landscapeCanvas {
-    display: block;
-    width: 100%;
-    height: 100%;
-  }
-  .canvas-overlay-tip {
+  canvas#fieldCanvas {
     position: absolute;
-    bottom: 8px;
-    left: 8px;
-    background: rgba(12, 16, 23, 0.85);
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+  }
+  .stage-hud {
+    position: absolute;
+    bottom: 8px; left: 8px;
+    background: rgba(7, 9, 14, 0.88);
+    backdrop-filter: blur(4px);
     border: 1px solid var(--border-subtle);
-    padding: 4px 8px;
     border-radius: 4px;
-    font-size: 11px;
-    color: var(--text-secondary);
+    padding: 4px 8px;
+    font-family: monospace;
+    font-size: 10px;
+    color: var(--text-dim);
     pointer-events: none;
   }
+  .stage-hud b { color: var(--text-main); }
 
-  /* Right Panel: Controls & Telemetry Charts */
-  .dashboard-card {
+  /* Right Dashboard */
+  .dashboard {
     display: flex;
     flex-direction: column;
-    gap: 14px;
+    gap: 12px;
   }
-  .control-group {
+  .box-card {
     background: var(--bg-surface);
     border: 1px solid var(--border-subtle);
     border-radius: 8px;
@@ -133,71 +184,37 @@
     flex-direction: column;
     gap: 10px;
   }
-  .section-label {
-    font-size: 11px;
-    font-weight: 700;
-    color: var(--text-secondary);
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
+  .card-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-  }
-
-  /* Buttons & Dropdowns */
-  .row-flex {
-    display: flex;
-    gap: 8px;
-    align-items: center;
-  }
-  button {
-    background: var(--bg-card);
-    color: var(--text-primary);
-    border: 1px solid var(--border-highlight);
-    padding: 6px 12px;
-    border-radius: 6px;
+    border-bottom: 1px solid #141a24;
+    padding-bottom: 6px;
     font-size: 11px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.15s ease;
+    font-weight: 700;
+    color: var(--text-dim);
+    letter-spacing: 0.4px;
+    text-transform: uppercase;
   }
-  button:hover {
-    background: #1c2431;
-    border-color: #485773;
-  }
-  button.active-btn {
-    background: rgba(56, 189, 248, 0.15);
-    border-color: var(--color-br);
-    color: #e0f2fe;
-  }
-  select {
-    background: var(--bg-card);
-    color: var(--text-primary);
-    border: 1px solid var(--border-highlight);
-    padding: 6px 10px;
-    border-radius: 6px;
-    font-size: 11px;
-    font-weight: 600;
-    outline: none;
-    cursor: pointer;
-  }
-
-  /* Sliders */
-  .slider-row {
+  .knob-row {
     display: flex;
     flex-direction: column;
     gap: 3px;
   }
-  .slider-label-val {
+  .knob-meta {
     display: flex;
     justify-content: space-between;
     font-size: 11px;
+  }
+  .val-badge {
+    font-family: monospace;
+    font-weight: 600;
   }
   input[type="range"] {
     -webkit-appearance: none;
     appearance: none;
     width: 100%;
-    height: 4px;
+    height: 3px;
     background: var(--border-subtle);
     border-radius: 2px;
     outline: none;
@@ -205,191 +222,195 @@
   input[type="range"]::-webkit-slider-thumb {
     -webkit-appearance: none;
     appearance: none;
-    width: 14px;
-    height: 14px;
+    width: 12px;
+    height: 12px;
     border-radius: 50%;
-    background: var(--color-br);
+    background: var(--c-br);
     cursor: pointer;
-    border: 2px solid #000;
+    border: 1px solid #fff;
   }
 
-  /* Telemetry Charts */
-  .charts-box {
+  /* Telemetry Dual Charts */
+  .telemetry-row {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 10px;
   }
-  .chart-container {
+  .chart-panel {
     background: #020305;
-    border: 1px solid var(--border-subtle);
+    border: 1px solid #141a24;
     border-radius: 6px;
     padding: 8px;
     display: flex;
     flex-direction: column;
     gap: 4px;
   }
-  .chart-title {
-    font-size: 10px;
-    font-weight: 700;
-    color: var(--text-secondary);
+  .chart-head {
     display: flex;
     justify-content: space-between;
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--text-dim);
   }
-  canvas.telemetry-chart {
+  canvas.plot-canvas {
     width: 100%;
-    height: 110px;
+    height: 120px;
     display: block;
   }
 
-  /* Metrics Table */
-  table.metrics-table {
+  /* Telemetry Matrix Table */
+  table.telemetry-grid {
     width: 100%;
     border-collapse: collapse;
-    font-size: 11px;
+    font-size: 10.5px;
   }
-  table.metrics-table th {
+  table.telemetry-grid th {
     text-align: left;
-    color: var(--text-secondary);
+    color: var(--text-dim);
     font-weight: 600;
-    padding: 4px 6px;
+    padding: 5px 6px;
     border-bottom: 1px solid var(--border-subtle);
   }
-  table.metrics-table td {
+  table.telemetry-grid td {
     padding: 4px 6px;
-    border-bottom: 1px solid #161c26;
+    border-bottom: 1px solid #111620;
+    font-family: monospace;
   }
-  .opt-toggle {
+  .tag-label {
     display: flex;
     align-items: center;
     gap: 6px;
     cursor: pointer;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    font-weight: 600;
     user-select: none;
   }
-  .dot-indicator {
-    width: 9px;
-    height: 9px;
+  .tag-pip {
+    width: 8px;
+    height: 8px;
     border-radius: 50%;
     display: inline-block;
   }
-  .opt-dimmed {
-    opacity: 0.35;
+  .row-dimmed {
+    opacity: 0.3;
     text-decoration: line-through;
-  }
-  .val-mono {
-    font-family: monospace;
-    font-size: 11px;
   }
 </style>
 </head>
 <body>
 
 <header>
-  <div class="header-titles">
-    <h1>Euler-Lagrange Neural Optimizer Laboratory <span class="badge">v0.1.0 Physics Engine</span></h1>
-    <p>Variational mechanics, relativistic Lorentz velocity clamping, and symplectic phase-space preservation</p>
+  <div class="title-group">
+    <h1>Euler-Lagrange Neural Optimizer Laboratory <span class="badge-tag">HiDPI &bull; Symplectic 60 FPS</span></h1>
+    <p class="header-sub">Continuous variational mechanics, Lorentz speed-of-light velocity clamping, and CFL spectral dynamics</p>
   </div>
-  <div class="row-flex">
-    <a href="https://github.com/shu195/euler-lagrange-neural-optimizer" target="_blank" style="text-decoration:none;">
-      <button>View GitHub Repository &rarr;</button>
+  <div>
+    <a href="https://github.com/shu195/euler-lagrange-neural-optimizer" target="_blank" class="git-btn">
+      View GitHub Repo &rarr;
     </a>
   </div>
 </header>
 
-<div class="main-layout">
-  <!-- Left Column: Landscape Canvas -->
-  <div class="canvas-card">
-    <div class="canvas-header">
-      <div class="row-flex">
-        <label style="font-weight:600; font-size:11px;">Target Landscape:</label>
-        <select id="landscapeSelect">
+<div class="workbench">
+  <!-- Left Column: HiDPI Phase Space -->
+  <div class="viewport-card">
+    <div class="toolbar">
+      <div class="tool-item">
+        <span style="color:var(--text-dim); font-weight:600;">Landscape:</span>
+        <select id="selLandscape">
           <option value="rosenbrock">Rosenbrock Valley (Curved Ravine)</option>
-          <option value="rastrigin">Rastrigin Function (Highly Multi-Modal)</option>
-          <option value="beale">Beale's Function (Sharp Ridge + Plateau)</option>
+          <option value="rastrigin">Rastrigin Grid (Dense Traps)</option>
+          <option value="beale">Beale's Ridge & Plateau</option>
           <option value="saddle">Hyperbolic Saddle Point</option>
         </select>
       </div>
-      <span id="coordDisplay" class="val-mono" style="color:var(--text-secondary); font-size:11px;">Start: (-1.50, 2.00)</span>
-    </div>
-
-    <div class="viewport-container" id="viewport">
-      <canvas id="landscapeCanvas" width="536" height="480"></canvas>
-      <div class="canvas-overlay-tip">&bull; Click & drag anywhere to set custom initial coordinates $\theta_0$</div>
-    </div>
-
-    <div class="row-flex" style="justify-content:space-between;">
-      <div class="row-flex">
-        <button id="btnPlayPause" class="active-btn">Pause</button>
-        <button id="btnStep">Step (+1)</button>
-        <button id="btnReset">Reset Particles</button>
+      <div class="tool-item">
+        <label style="display:flex; align-items:center; gap:4px; color:var(--text-dim); cursor:pointer;">
+          <input type="checkbox" id="chkVectors" checked>
+          <span>Force Field $-\nabla L$</span>
+        </label>
       </div>
-      <div class="row-flex">
-        <span style="font-size:11px; color:var(--text-secondary);">Speed:</span>
-        <button class="speed-btn" data-speed="1">1x</button>
-        <button class="speed-btn active-btn" data-speed="2">2x</button>
-        <button class="speed-btn" data-speed="5">5x</button>
+    </div>
+
+    <div class="canvas-stage" id="stage">
+      <canvas id="fieldCanvas"></canvas>
+      <div class="stage-hud" id="hudText">&bull; Click / Drag anywhere on surface to deploy initial coordinates $\theta_0$</div>
+    </div>
+
+    <div class="toolbar">
+      <div class="tool-item">
+        <button id="btnTogglePlay" class="btn-primary">Pause</button>
+        <button id="btnStepFwd">Step (+1)</button>
+        <button id="btnResetAll">Reset</button>
+      </div>
+      <div class="tool-item">
+        <span style="color:var(--text-dim);">Playback:</span>
+        <button class="btn-speed" data-mult="1">1x</button>
+        <button class="btn-speed btn-primary" data-mult="2">2x</button>
+        <button class="btn-speed" data-mult="6">6x</button>
       </div>
     </div>
   </div>
 
-  <!-- Right Column: Physics Knobs & Live Telemetry -->
-  <div class="dashboard-card">
-    <!-- Knobs Group -->
-    <div class="control-group">
-      <div class="section-label">
+  <!-- Right Column: Live Physics Telemetry -->
+  <div class="dashboard">
+    <!-- Knobs Panel -->
+    <div class="box-card">
+      <div class="card-header">
         <span>Variational Physics Controls</span>
-        <span id="stepCounter" class="val-mono" style="color:var(--color-br);">Step: 0</span>
+        <span id="stepDisplay" style="color:var(--c-br); font-family:monospace;">Step: 0 / 1500</span>
       </div>
 
-      <div class="slider-row">
-        <div class="slider-label-val">
+      <div class="knob-row">
+        <div class="knob-meta">
           <span>Speed of Light Barrier $c$ (Relativistic Clamping):</span>
-          <span id="valC" class="val-mono" style="color:var(--color-rel);">5.0</span>
+          <span id="txtC" class="val-badge" style="color:var(--c-rel);">5.0</span>
         </div>
-        <input type="range" id="sliderC" min="1.0" max="15.0" step="0.5" value="5.0">
+        <input type="range" id="rngC" min="1.0" max="15.0" step="0.5" value="5.0">
       </div>
 
-      <div class="slider-row">
-        <div class="slider-label-val">
-          <span>Rayleigh Dissipation $\gamma$ (Friction / Damping):</span>
-          <span id="valGamma" class="val-mono" style="color:var(--color-sv);">0.80</span>
+      <div class="knob-row">
+        <div class="knob-meta">
+          <span>Rayleigh Friction $\gamma$ (Dissipation Rate):</span>
+          <span id="txtGamma" class="val-badge" style="color:var(--c-sv);">0.80</span>
         </div>
-        <input type="range" id="sliderGamma" min="0.1" max="2.5" step="0.05" value="0.80">
+        <input type="range" id="rngGamma" min="0.05" max="2.5" step="0.05" value="0.80">
       </div>
 
-      <div class="slider-row">
-        <div class="slider-label-val">
+      <div class="knob-row">
+        <div class="knob-meta">
           <span>Symplectic Time-Step $\Delta t$:</span>
-          <span id="valDt" class="val-mono" style="color:var(--color-br);">0.020</span>
+          <span id="txtDt" class="val-badge" style="color:var(--c-br);">0.020</span>
         </div>
-        <input type="range" id="sliderDt" min="0.005" max="0.050" step="0.002" value="0.020">
+        <input type="range" id="rngDt" min="0.005" max="0.050" step="0.002" value="0.020">
       </div>
     </div>
 
-    <!-- Telemetry Charts -->
-    <div class="charts-box">
-      <div class="chart-container">
-        <div class="chart-title">
+    <!-- Telemetry Dual Plots -->
+    <div class="telemetry-row">
+      <div class="chart-panel">
+        <div class="chart-head">
           <span>LOSS CONVERGENCE</span>
-          <span class="val-mono">&log;<sub>10</sub> L(&theta;)</span>
+          <span>&log;<sub>10</sub> L(&theta;)</span>
         </div>
-        <canvas id="lossChart" class="telemetry-chart" width="230" height="110"></canvas>
+        <canvas id="chartLoss" class="plot-canvas"></canvas>
       </div>
-      <div class="chart-container">
-        <div class="chart-title">
+      <div class="chart-panel">
+        <div class="chart-head">
           <span>VELOCITY MAGNITUDE</span>
-          <span class="val-mono">||&theta;&#775;|| &le; c</span>
+          <span>||&theta;&#775;|| &le; c</span>
         </div>
-        <canvas id="velocityChart" class="telemetry-chart" width="230" height="110"></canvas>
+        <canvas id="chartVelocity" class="plot-canvas"></canvas>
       </div>
     </div>
 
-    <!-- Live Optimizer Table -->
-    <div class="control-group">
-      <div class="section-label">
-        <span>Optimizer Status & Metrics</span>
-        <span style="font-size:10px; font-weight:400; text-transform:none;">(Click label to toggle line)</span>
+    <!-- Live Telemetry Matrix -->
+    <div class="box-card">
+      <div class="card-header">
+        <span>Phase-Space State Matrix</span>
+        <span style="font-size:9.5px; text-transform:none;">(Click label to isolate trace)</span>
       </div>
-      <table class="metrics-table">
+      <table class="telemetry-grid">
         <thead>
           <tr>
             <th>Method</th>
@@ -398,8 +419,8 @@
             <th>Velocity $\|\dot{\theta}\|$</th>
           </tr>
         </thead>
-        <tbody id="metricsBody">
-          <!-- Populated by JS -->
+        <tbody id="telemetryRows">
+          <!-- Dynamically populated -->
         </tbody>
       </table>
     </div>
@@ -407,14 +428,14 @@
 </div>
 
 <script>
-// --- Landscape Definitions ---
+// =============================================================================
+// 1. HIGH-PRECISION MATHEMATICAL LANDSCAPES
+// =============================================================================
 const landscapes = {
   rosenbrock: {
     name: "Rosenbrock Valley",
-    rangeX: [-1.8, 1.4],
-    rangeY: [-0.5, 2.5],
-    start: [-1.5, 2.0],
-    target: [1.0, 1.0],
+    rangeX: [-1.8, 1.4], rangeY: [-0.5, 2.5],
+    start: [-1.5, 2.0], target: [1.0, 1.0],
     f: (x, y) => (1.0 - x)**2 + 100.0 * (y - x*x)**2,
     grad: (x, y) => [
       -2.0 * (1.0 - x) - 400.0 * x * (y - x*x),
@@ -423,10 +444,8 @@ const landscapes = {
   },
   rastrigin: {
     name: "Rastrigin Multi-Modal",
-    rangeX: [-2.5, 2.5],
-    rangeY: [-2.5, 2.5],
-    start: [-2.1, 1.8],
-    target: [0.0, 0.0],
+    rangeX: [-2.5, 2.5], rangeY: [-2.5, 2.5],
+    start: [-2.1, 1.8], target: [0.0, 0.0],
     f: (x, y) => 20.0 + (x*x - 10.0*Math.cos(2*Math.PI*x)) + (y*y - 10.0*Math.cos(2*Math.PI*y)),
     grad: (x, y) => [
       2*x + 20*Math.PI*Math.sin(2*Math.PI*x),
@@ -434,11 +453,9 @@ const landscapes = {
     ]
   },
   beale: {
-    name: "Beale's Ridge & Plateau",
-    rangeX: [-1.0, 4.0],
-    rangeY: [-1.5, 1.8],
-    start: [-0.5, 1.5],
-    target: [3.0, 0.5],
+    name: "Beale's Function",
+    rangeX: [-1.0, 4.0], rangeY: [-1.5, 1.8],
+    start: [-0.5, 1.5], target: [3.0, 0.5],
     f: (x, y) => (1.5 - x + x*y)**2 + (2.25 - x + x*y*y)**2 + (2.625 - x + x*y*y*y)**2,
     grad: (x, y) => [
       2*(1.5 - x + x*y)*(y - 1) + 2*(2.25 - x + x*y*y)*(y*y - 1) + 2*(2.625 - x + x*y*y*y)*(y*y*y - 1),
@@ -447,10 +464,8 @@ const landscapes = {
   },
   saddle: {
     name: "Hyperbolic Saddle Point",
-    rangeX: [-2.0, 2.0],
-    rangeY: [-2.0, 2.0],
-    start: [-1.8, 0.05],
-    target: [0.0, 0.0],
+    rangeX: [-2.0, 2.0], rangeY: [-2.0, 2.0],
+    start: [-1.8, 0.05], target: [0.0, 0.0],
     f: (x, y) => x*x - y*y + 4.0,
     grad: (x, y) => [2*x, -2*y]
   }
@@ -458,85 +473,151 @@ const landscapes = {
 
 let currentLandscape = landscapes.rosenbrock;
 
-// Canvas setup
-const canvas = document.getElementById('landscapeCanvas');
+// =============================================================================
+// 2. HiDPI CANVAS CONFIGURATION & COORDINATE PROJECTIONS
+// =============================================================================
+const canvas = document.getElementById('fieldCanvas');
 const ctx = canvas.getContext('2d');
-const W = canvas.width, H = canvas.height;
+const dpr = Math.max(2, window.devicePixelRatio || 1);
 
-// Background cache canvas
-const bgCanvas = document.createElement('canvas');
-bgCanvas.width = W; bgCanvas.height = H;
-const bgCtx = bgCanvas.getContext('2d');
+let cssW = 0, cssH = 0;
+function resizeCanvases() {
+  const rect = document.getElementById('stage').getBoundingClientRect();
+  cssW = rect.width; cssH = rect.height;
+  canvas.width = cssW * dpr;
+  canvas.height = cssH * dpr;
+  ctx.resetTransform();
+  ctx.scale(dpr, dpr);
+
+  ['chartLoss', 'chartVelocity'].forEach(id => {
+    const c = document.getElementById(id);
+    const cr = c.getBoundingClientRect();
+    c.width = cr.width * dpr;
+    c.height = cr.height * dpr;
+    const g = c.getContext('2d');
+    g.resetTransform();
+    g.scale(dpr, dpr);
+  });
+  renderAnalyticalBackground();
+}
 
 function toScreenX(x) {
   const [minX, maxX] = currentLandscape.rangeX;
-  return ((x - minX) / (maxX - minX)) * W;
+  return ((x - minX) / (maxX - minX)) * cssW;
 }
 function toScreenY(y) {
   const [minY, maxY] = currentLandscape.rangeY;
-  return H - ((y - minY) / (maxY - minY)) * H;
+  return cssH - ((y - minY) / (maxY - minY)) * cssH;
 }
 function toWorldX(px) {
   const [minX, maxX] = currentLandscape.rangeX;
-  return minX + (px / W) * (maxX - minX);
+  return minX + (px / cssW) * (maxX - minX);
 }
 function toWorldY(py) {
   const [minY, maxY] = currentLandscape.rangeY;
-  return maxY - (py / H) * (maxY - minY);
+  return maxY - (py / cssH) * (maxY - minY);
 }
 
-// Pre-render background loss contours
-function renderBackground() {
-  const imgData = bgCtx.createImageData(W, H);
+// =============================================================================
+// 3. SHARP VECTOR ISOLINES & FORCE FIELD RENDERING
+// =============================================================================
+const bgCanvas = document.createElement('canvas');
+const bgCtx = bgCanvas.getContext('2d');
+
+function renderAnalyticalBackground() {
+  bgCanvas.width = cssW * dpr;
+  bgCanvas.height = cssH * dpr;
+  bgCtx.resetTransform();
+  bgCtx.scale(dpr, dpr);
+
   const [minX, maxX] = currentLandscape.rangeX;
   const [minY, maxY] = currentLandscape.rangeY;
-  
-  // Sample min and max loss values for contrast normalization
-  for (let py = 0; py < H; py += 2) {
-    const y = maxY - (py / H) * (maxY - minY);
-    for (let px = 0; px < W; px += 2) {
-      const x = minX + (px / W) * (maxX - minX);
-      const z = Math.max(0.01, currentLandscape.f(x, y));
-      const logZ = Math.log10(z);
-      // Cyberpunk deep navy/purple palette
-      const norm = Math.min(1.0, Math.max(0.0, (logZ + 1.0) / 4.5));
-      const r = Math.floor(norm * 25);
-      const g = Math.floor(norm * 45);
-      const b = Math.floor(norm * 90);
 
-      // Block-fill 2x2 for speed
-      for (let dy = 0; dy < 2; dy++) {
-        for (let dx = 0; dx < 2; dx++) {
-          const idx = ((py + dy) * W + (px + dx)) * 4;
-          imgData.data[idx] = r;
-          imgData.data[idx+1] = g;
-          imgData.data[idx+2] = b;
-          imgData.data[idx+3] = 255;
-        }
+  // Ultra-fine pixel buffer
+  const imgData = bgCtx.createImageData(cssW, cssH);
+  const data = imgData.data;
+
+  for (let py = 0; py < cssH; py++) {
+    const wy = maxY - (py / cssH) * (maxY - minY);
+    for (let px = 0; px < cssW; px++) {
+      const wx = minX + (px / cssW) * (maxX - minX);
+      const z = Math.max(0.001, currentLandscape.f(wx, wy));
+      const logZ = Math.log10(z);
+
+      // Smooth gradient palette
+      const norm = Math.min(1.0, Math.max(0.0, (logZ + 2.0) / 5.5));
+      let r = Math.floor(norm * 18);
+      let g = Math.floor(norm * 38);
+      let b = Math.floor(norm * 75);
+
+      // Sharp analytical neon isoline overlay: sin-modulated logarithm
+      const isLine = Math.abs(Math.sin(logZ * Math.PI * 3.0));
+      if (isLine > 0.96) {
+        r = Math.min(255, r + 45);
+        g = Math.min(255, g + 85);
+        b = Math.min(255, b + 140);
       }
+
+      const idx = (py * cssW + px) * 4;
+      data[idx] = r; data[idx+1] = g; data[idx+2] = b; data[idx+3] = 255;
     }
   }
   bgCtx.putImageData(imgData, 0, 0);
 
-  // Target marker
+  // Draw force field arrows if enabled
+  if (document.getElementById('chkVectors').checked) {
+    bgCtx.save();
+    bgCtx.strokeStyle = 'rgba(125, 135, 149, 0.18)';
+    bgCtx.fillStyle = 'rgba(125, 135, 149, 0.18)';
+    bgCtx.lineWidth = 1.0;
+
+    const gridStep = 24;
+    for (let py = 12; py < cssH; py += gridStep) {
+      const wy = toWorldY(py);
+      for (let px = 12; px < cssW; px += gridStep) {
+        const wx = toWorldX(px);
+        const g = currentLandscape.grad(wx, wy);
+        const norm = Math.hypot(g[0], g[1]);
+        if (norm > 1e-4) {
+          const dx = (-g[0] / norm) * 7.0;
+          const dy = (g[1] / norm) * 7.0; // Inverted Y screen coord
+          bgCtx.beginPath();
+          bgCtx.moveTo(px, py);
+          bgCtx.lineTo(px + dx, py + dy);
+          bgCtx.stroke();
+        }
+      }
+    }
+    bgCtx.restore();
+  }
+
+  // Draw Target Marker with Concentric Halos
   const tx = toScreenX(currentLandscape.target[0]);
   const ty = toScreenY(currentLandscape.target[1]);
-  bgCtx.fillStyle = '#ff5252';
-  bgCtx.beginPath();
-  bgCtx.arc(tx, ty, 5, 0, Math.PI * 2);
-  bgCtx.fill();
+  bgCtx.save();
+  bgCtx.strokeStyle = 'rgba(248, 113, 113, 0.4)';
+  bgCtx.lineWidth = 1.5;
+  bgCtx.beginPath(); bgCtx.arc(tx, ty, 8, 0, Math.PI * 2); bgCtx.stroke();
+  bgCtx.beginPath(); bgCtx.arc(tx, ty, 14, 0, Math.PI * 2); bgCtx.stroke();
+
+  bgCtx.fillStyle = '#f87171';
+  bgCtx.beginPath(); bgCtx.arc(tx, ty, 4, 0, Math.PI * 2); bgCtx.fill();
+
   bgCtx.fillStyle = '#ffffff';
-  bgCtx.font = '10px monospace';
-  bgCtx.fillText("Target Min", tx + 8, ty - 3);
+  bgCtx.font = '600 10px monospace';
+  bgCtx.fillText(`Target (${currentLandscape.target[0].toFixed(1)}, ${currentLandscape.target[1].toFixed(1)})`, tx + 10, ty - 4);
+  bgCtx.restore();
 }
 
-// --- Optimizers Configuration ---
+// =============================================================================
+// 4. PARTICLES & PHYSICAL INTEGRATION LOOP
+// =============================================================================
 const optimizers = [
-  { id: 'sgd', name: 'SGD (Aristotelian)', color: '#ff5252', visible: true, active: true },
-  { id: 'hb', name: 'Heavy Ball E-L', color: '#c084fc', visible: true, active: true },
-  { id: 'br', name: 'Bregman E-L (3/t)', color: '#38bdf8', visible: true, active: true },
-  { id: 'sv', name: 'Störmer-Verlet Symplectic', color: '#fb923c', visible: true, active: true },
-  { id: 'rel', name: 'Relativistic E-L (||v|| < c)', color: '#4ade80', visible: true, active: true }
+  { id: 'sgd', name: 'SGD (Aristotelian)', color: '#f87171', visible: true },
+  { id: 'hb', name: 'Heavy Ball E-L', color: '#c084fc', visible: true },
+  { id: 'br', name: 'Bregman E-L (3/t)', color: '#38bdf8', visible: true },
+  { id: 'sv', name: 'Störmer-Verlet Symplectic', color: '#fb923c', visible: true },
+  { id: 'rel', name: 'Relativistic E-L (||v|| < c)', color: '#4ade80', visible: true }
 ];
 
 let particles = {};
@@ -546,7 +627,6 @@ let step = 0;
 let isPlaying = true;
 let speedMult = 2;
 
-// Physics parameters
 let paramC = 5.0;
 let paramGamma = 0.8;
 let paramDt = 0.02;
@@ -566,16 +646,16 @@ function resetSimulation(x0, y0) {
   historyLoss = { sgd: [], hb: [], br: [], sv: [], rel: [] };
   historyVelocity = { sgd: [], hb: [], br: [], sv: [], rel: [] };
 
-  document.getElementById('coordDisplay').innerText = `Start: (${x0.toFixed(2)}, ${y0.toFixed(2)})`;
+  document.getElementById('hudText').innerHTML = `&bull; Deployed at: <b>(${x0.toFixed(3)}, ${y0.toFixed(3)})</b> | Target: <b>(${currentLandscape.target[0]}, ${currentLandscape.target[1]})</b>`;
 }
 
-function physicsStep() {
-  if (step >= 1200) return;
+function physicsSubstep() {
+  if (step >= 1500) return;
   const dt = paramDt;
   const gamma = paramGamma;
   const c = paramC;
 
-  // 1. SGD (Aristotelian)
+  // 1. SGD
   let g = currentLandscape.grad(particles.sgd.x, particles.sgd.y);
   let gx = Math.max(-1e3, Math.min(1e3, g[0]));
   let gy = Math.max(-1e3, Math.min(1e3, g[1]));
@@ -586,7 +666,7 @@ function physicsStep() {
   particles.sgd.y += dt * particles.sgd.vy;
   particles.sgd.path.push([particles.sgd.x, particles.sgd.y]);
 
-  // 2. Heavy Ball (Constant mass & friction)
+  // 2. Heavy Ball
   g = currentLandscape.grad(particles.hb.x, particles.hb.y);
   gx = Math.max(-1e3, Math.min(1e3, g[0]));
   gy = Math.max(-1e3, Math.min(1e3, g[1]));
@@ -596,7 +676,7 @@ function physicsStep() {
   particles.hb.y += dt * particles.hb.vy;
   particles.hb.path.push([particles.hb.x, particles.hb.y]);
 
-  // 3. Bregman Euler-Lagrange (3/t Damping)
+  // 3. Bregman 3/t
   g = currentLandscape.grad(particles.br.x, particles.br.y);
   gx = Math.max(-1e3, Math.min(1e3, g[0]));
   gy = Math.max(-1e3, Math.min(1e3, g[1]));
@@ -636,7 +716,6 @@ function physicsStep() {
   particles.rel.y += dt * particles.rel.vy;
   particles.rel.path.push([particles.rel.x, particles.rel.y]);
 
-  // Record telemetry
   optimizers.forEach(opt => {
     const p = particles[opt.id];
     const loss = currentLandscape.f(p.x, p.y);
@@ -648,111 +727,114 @@ function physicsStep() {
   step++;
 }
 
-// Draw Particle Path with Head Halo
-function drawParticlePath(opt) {
-  if (!opt.visible) return;
-  const p = particles[opt.id];
-  const path = p.path;
-  if (path.length < 2) return;
+// =============================================================================
+// 5. RENDERING PIPELINE: SHARP GLOW PATHS & VECTORS
+// =============================================================================
+function renderPaths() {
+  ctx.drawImage(bgCanvas, 0, 0, cssW, cssH);
 
-  // Trail
-  ctx.save();
-  ctx.strokeStyle = opt.color;
-  ctx.lineWidth = 2.0;
-  ctx.beginPath();
-  ctx.moveTo(toScreenX(path[0][0]), toScreenY(path[0][1]));
-  for (let i = 1; i < path.length; i++) {
-    ctx.lineTo(toScreenX(path[i][0]), toScreenY(path[i][1]));
-  }
-  ctx.stroke();
+  optimizers.forEach(opt => {
+    if (!opt.visible) return;
+    const p = particles[opt.id];
+    const path = p.path;
+    if (path.length < 2) return;
 
-  // Head with glow
-  const hx = toScreenX(p.x);
-  const hy = toScreenY(p.y);
-  ctx.shadowColor = opt.color;
-  ctx.shadowBlur = 10;
-  ctx.fillStyle = opt.color;
-  ctx.beginPath();
-  ctx.arc(hx, hy, 4.5, 0, Math.PI * 2);
-  ctx.fill();
+    ctx.save();
+    ctx.strokeStyle = opt.color;
+    ctx.lineWidth = 2.0;
+    ctx.beginPath();
+    ctx.moveTo(toScreenX(path[0][0]), toScreenY(path[0][1]));
+    for (let i = 1; i < path.length; i++) {
+      ctx.lineTo(toScreenX(path[i][0]), toScreenY(path[i][1]));
+    }
+    ctx.stroke();
 
-  ctx.shadowBlur = 0;
-  ctx.strokeStyle = '#ffffff';
-  ctx.lineWidth = 1.0;
-  ctx.stroke();
+    // Particle Head with Concentric Glow
+    const hx = toScreenX(p.x);
+    const hy = toScreenY(p.y);
 
-  // Draw velocity vector arrow
-  ctx.strokeStyle = opt.color;
-  ctx.lineWidth = 1.5;
-  ctx.beginPath();
-  ctx.moveTo(hx, hy);
-  ctx.lineTo(hx + p.vx * 4.0, hy - p.vy * 4.0);
-  ctx.stroke();
+    ctx.shadowColor = opt.color;
+    ctx.shadowBlur = 8;
+    ctx.fillStyle = opt.color;
+    ctx.beginPath(); ctx.arc(hx, hy, 4, 0, Math.PI * 2); ctx.fill();
 
-  ctx.restore();
+    ctx.shadowBlur = 0;
+    ctx.strokeStyle = '#ffffff';
+    ctx.lineWidth = 1.2;
+    ctx.stroke();
+
+    // Velocity Vector
+    ctx.strokeStyle = opt.color;
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    ctx.moveTo(hx, hy);
+    ctx.lineTo(hx + p.vx * 3.5, hy - p.vy * 3.5);
+    ctx.stroke();
+
+    ctx.restore();
+  });
 }
 
-// Telemetry Line Charts
-function renderTelemetryChart(canvasId, historyData, isLog, thresholdLine) {
+// =============================================================================
+// 6. CRISP TELEMETRY PLOTS
+// =============================================================================
+function renderPlot(canvasId, seriesObj, isLog, limitVal) {
   const c = document.getElementById(canvasId);
   const g = c.getContext('2d');
-  const w = c.width, h = c.height;
+  const w = c.getBoundingClientRect().width;
+  const h = c.getBoundingClientRect().height;
   g.clearRect(0, 0, w, h);
 
-  // Background grid
-  g.strokeStyle = '#161c26';
-  g.lineWidth = 1;
-  for (let y = 20; y < h; y += 25) {
+  // High-contrast grid lines
+  g.strokeStyle = '#141a24';
+  g.lineWidth = 1.0;
+  for (let y = 20; y < h; y += 28) {
     g.beginPath(); g.moveTo(0, y); g.lineTo(w, y); g.stroke();
   }
 
-  // Draw c threshold if present
-  if (thresholdLine !== undefined) {
-    const yC = h - (thresholdLine / 15.0) * (h - 15) - 8;
+  // Draw relativistic limit line if active
+  if (limitVal !== undefined) {
+    const yC = h - 8 - (limitVal / 15.0) * (h - 16);
     g.save();
-    g.strokeStyle = '#6b7280';
+    g.strokeStyle = 'rgba(74, 222, 128, 0.7)';
     g.setLineDash([3, 3]);
+    g.lineWidth = 1.0;
     g.beginPath(); g.moveTo(0, yC); g.lineTo(w, yC); g.stroke();
-    g.fillStyle = '#9ca3af';
-    g.font = '9px monospace';
-    g.fillText(`c barrier = ${thresholdLine.toFixed(1)}`, 6, yC - 3);
+    g.fillStyle = '#4ade80';
+    g.font = '600 9px monospace';
+    g.fillText(`c barrier = ${limitVal.toFixed(1)}`, 4, Math.max(10, yC - 3));
     g.restore();
   }
 
-  // Draw traces
+  const maxSteps = 1500;
   optimizers.forEach(opt => {
     if (!opt.visible) return;
-    const series = historyData[opt.id];
-    if (series.length < 2) return;
+    const arr = seriesObj[opt.id];
+    if (arr.length < 2) return;
 
     g.strokeStyle = opt.color;
-    g.lineWidth = 1.5;
+    g.lineWidth = 1.6;
     g.beginPath();
-
-    const maxSteps = 1200;
-    for (let i = 0; i < series.length; i++) {
-      const xPix = (i / maxSteps) * w;
-      let val = series[i];
-      let yPix = 0;
+    for (let i = 0; i < arr.length; i++) {
+      const px = (i / maxSteps) * w;
+      let val = arr[i];
+      let py = 0;
       if (isLog) {
-        const logVal = Math.log10(val);
-        // Map [-20, 4] to [h - 8, 8]
-        yPix = h - 8 - ((logVal - (-20)) / 24.0) * (h - 16);
+        const logV = Math.log10(val);
+        py = h - 6 - ((logV - (-20)) / 24.0) * (h - 12);
       } else {
-        // Linear velocity [0, 15]
-        yPix = h - 8 - (val / 15.0) * (h - 16);
+        py = h - 6 - (val / 15.0) * (h - 12);
       }
-      yPix = Math.max(4, Math.min(h - 4, yPix));
-      if (i === 0) g.moveTo(xPix, yPix);
-      else g.lineTo(xPix, yPix);
+      py = Math.max(2, Math.min(h - 2, py));
+      if (i === 0) g.moveTo(px, py);
+      else g.lineTo(px, py);
     }
     g.stroke();
   });
 }
 
-// Update DOM Metrics Table
-function updateMetricsTable() {
-  const tbody = document.getElementById('metricsBody');
+function updateTable() {
+  const tbody = document.getElementById('telemetryRows');
   tbody.innerHTML = '';
   optimizers.forEach(opt => {
     const p = particles[opt.id];
@@ -762,65 +844,60 @@ function updateMetricsTable() {
     const tr = document.createElement('tr');
     tr.innerHTML = `
       <td>
-        <span class="opt-toggle ${opt.visible ? '' : 'opt-dimmed'}" data-id="${opt.id}">
-          <span class="dot-indicator" style="background:${opt.color};"></span>
+        <span class="tag-label ${opt.visible ? '' : 'row-dimmed'}" data-id="${opt.id}">
+          <span class="tag-pip" style="background:${opt.color};"></span>
           <b>${opt.name.split(' ')[0]}</b>
         </span>
       </td>
-      <td class="val-mono">(${p.x.toFixed(3)}, ${p.y.toFixed(3)})</td>
-      <td class="val-mono">${loss < 1e-4 ? loss.toExponential(3) : loss.toFixed(4)}</td>
-      <td class="val-mono">${vMag.toFixed(3)}</td>
+      <td>(${p.x.toFixed(3)}, ${p.y.toFixed(3)})</td>
+      <td style="color:${loss < 1e-4 ? 'var(--c-rel)' : 'inherit'};">${loss < 1e-4 ? loss.toExponential(3) : loss.toFixed(4)}</td>
+      <td>${vMag.toFixed(3)}</td>
     `;
     tbody.appendChild(tr);
   });
 
-  // Attach toggle listeners
-  document.querySelectorAll('.opt-toggle').forEach(el => {
+  document.querySelectorAll('.tag-label').forEach(el => {
     el.onclick = () => {
       const id = el.getAttribute('data-id');
-      const targetOpt = optimizers.find(o => o.id === id);
-      targetOpt.visible = !targetOpt.visible;
-      updateMetricsTable();
+      const opt = optimizers.find(o => o.id === id);
+      opt.visible = !opt.visible;
+      updateTable();
     };
   });
 }
 
-function mainLoop() {
+// =============================================================================
+// 7. RAF MAIN LOOP & EVENT HANDLING
+// =============================================================================
+function frameLoop() {
   if (isPlaying) {
     for (let k = 0; k < speedMult; k++) {
-      physicsStep();
+      physicsSubstep();
     }
   }
 
-  // Draw landscape background
-  ctx.drawImage(bgCanvas, 0, 0);
+  renderPaths();
+  renderPlot('chartLoss', historyLoss, true);
+  renderPlot('chartVelocity', historyVelocity, false, paramC);
+  updateTable();
 
-  // Draw paths
-  optimizers.forEach(drawParticlePath);
-
-  // Draw charts & table
-  renderTelemetryChart('lossChart', historyLoss, true);
-  renderTelemetryChart('velocityChart', historyVelocity, false, paramC);
-  updateMetricsTable();
-
-  document.getElementById('stepCounter').innerText = `Step: ${step} / 1200`;
-
-  requestAnimationFrame(mainLoop);
+  document.getElementById('stepDisplay').innerText = `Step: ${step} / 1500`;
+  requestAnimationFrame(frameLoop);
 }
 
-// Interactive Viewport Mouse Click & Drag
-const viewport = document.getElementById('viewport');
+// Interactive Viewport Mouse Handling
+const stage = document.getElementById('stage');
 let isMouseDown = false;
-viewport.addEventListener('mousedown', (e) => {
+stage.addEventListener('mousedown', (e) => {
   isMouseDown = true;
-  handleCanvasPointer(e);
+  triggerPointerSpawn(e);
 });
-viewport.addEventListener('mousemove', (e) => {
-  if (isMouseDown) handleCanvasPointer(e);
+stage.addEventListener('mousemove', (e) => {
+  if (isMouseDown) triggerPointerSpawn(e);
 });
 window.addEventListener('mouseup', () => { isMouseDown = false; });
 
-function handleCanvasPointer(e) {
+function triggerPointerSpawn(e) {
   const rect = canvas.getBoundingClientRect();
   const px = e.clientX - rect.left;
   const py = e.clientY - rect.top;
@@ -829,54 +906,62 @@ function handleCanvasPointer(e) {
   resetSimulation(wx, wy);
 }
 
-// UI Event Listeners
-document.getElementById('landscapeSelect').onchange = (e) => {
+// Controls Listeners
+document.getElementById('selLandscape').onchange = (e) => {
   currentLandscape = landscapes[e.target.value];
-  renderBackground();
+  renderAnalyticalBackground();
   resetSimulation();
 };
 
-document.getElementById('btnPlayPause').onclick = () => {
+document.getElementById('chkVectors').onchange = () => {
+  renderAnalyticalBackground();
+};
+
+document.getElementById('btnTogglePlay').onclick = () => {
   isPlaying = !isPlaying;
-  document.getElementById('btnPlayPause').innerText = isPlaying ? "Pause" : "Resume";
+  document.getElementById('btnTogglePlay').innerText = isPlaying ? "Pause" : "Resume";
 };
 
-document.getElementById('btnStep').onclick = () => {
+document.getElementById('btnStepFwd').onclick = () => {
   isPlaying = false;
-  document.getElementById('btnPlayPause').innerText = "Resume";
-  physicsStep();
+  document.getElementById('btnTogglePlay').innerText = "Resume";
+  physicsSubstep();
 };
 
-document.getElementById('btnReset').onclick = () => {
+document.getElementById('btnResetAll').onclick = () => {
   resetSimulation();
 };
 
-document.querySelectorAll('.speed-btn').forEach(btn => {
+document.querySelectorAll('.btn-speed').forEach(btn => {
   btn.onclick = () => {
-    document.querySelectorAll('.speed-btn').forEach(b => b.classList.remove('active-btn'));
-    btn.classList.add('active-btn');
-    speedMult = parseInt(btn.getAttribute('data-speed'));
+    document.querySelectorAll('.btn-speed').forEach(b => b.classList.remove('btn-primary'));
+    btn.classList.add('btn-primary');
+    speedMult = parseInt(btn.getAttribute('data-mult'));
   };
 });
 
 // Physics Sliders
-document.getElementById('sliderC').oninput = (e) => {
+document.getElementById('rngC').oninput = (e) => {
   paramC = parseFloat(e.target.value);
-  document.getElementById('valC').innerText = paramC.toFixed(1);
+  document.getElementById('txtC').innerText = paramC.toFixed(1);
 };
-document.getElementById('sliderGamma').oninput = (e) => {
+document.getElementById('rngGamma').oninput = (e) => {
   paramGamma = parseFloat(e.target.value);
-  document.getElementById('valGamma').innerText = paramGamma.toFixed(2);
+  document.getElementById('txtGamma').innerText = paramGamma.toFixed(2);
 };
-document.getElementById('sliderDt').oninput = (e) => {
+document.getElementById('rngDt').oninput = (e) => {
   paramDt = parseFloat(e.target.value);
-  document.getElementById('valDt').innerText = paramDt.toFixed(3);
+  document.getElementById('txtDt').innerText = paramDt.toFixed(3);
 };
 
-// Initialize
-renderBackground();
-resetSimulation();
-mainLoop();
+window.addEventListener('resize', resizeCanvases);
+
+// Boot
+window.onload = () => {
+  resizeCanvases();
+  resetSimulation();
+  frameLoop();
+};
 </script>
 </body>
 </html>
