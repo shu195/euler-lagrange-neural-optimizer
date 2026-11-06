@@ -28,3 +28,8 @@ venv/
 ENV/
 .idea/
 .vscode/
+*.aux
+*.log
+*.out
+*.synctex.gz
+paper/rendered_pages/

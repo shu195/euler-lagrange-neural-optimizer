@@ -11,11 +11,10 @@
 
 \newcommand{\url}[1]{\texttt{#1}}
 
-\title{\textbf{Variational Parameter Dynamics: The Courant-Friedrichs-Lewy Depth Catastrophe and Relativistic Momentum in Neural Networks}}
+\title{\LARGE\textbf{Variational Parameter Dynamics: The Courant-Friedrichs-Lewy Depth Catastrophe and Relativistic Momentum in Neural Networks}}
 
 \author{
-  \textbf{shu195}$^{1}$ \quad \textbf{Antigravity}$^{1}$ \\
-  $^{1}$Antigravity Symplectic Research Laboratory \\
+  \textbf{Shubham Barmase} \\
   \texttt{barmase32@gmail.com}
 }
 
@@ -26,12 +25,7 @@
 \maketitle
 
 \begin{abstract}
-Standard deep learning optimization heuristics---such as stochastic gradient descent (SGD), Polyak heavy-ball momentum, and Nesterov acceleration---are conventionally formulated as discrete update maps. In this paper, we elevate parameter optimization to continuous variational mechanics governed by Hamilton's Principle of Stationary Action over configuration trajectories $\theta(t) \in \mathbb{R}^D$:
-$S[\theta] = \int_0^T \mathcal{L}(\theta, \dot{\theta}, t) \, dt$.
-We establish three primary theoretical and empirical discoveries:
-(1) Momentum, Nesterov acceleration, and gradient clipping are exact physical manifestations of Euclidean mass, Bregman Lagrangian criticality ($\gamma(t)=3/t$), and Lorentz-invariant relativistic velocity clamping ($\|\dot{\theta}\| < c$). Under relativistic kinetic energy $T = -mc^2\sqrt{1-\|\dot{\theta}\|^2/c^2}$, parameter velocity is strictly bounded below $c$, eliminating momentum overshoot on steep cliffs and attaining machine-precision convergence ($1.67 \times 10^{-20}$) on non-convex landscapes where SGD stalls at $1.95 \times 10^{-1}$.
-(2) Deep feedforward networks exhibit an exponential block-hierarchical Hessian condition gap ($\kappa \approx 1.42 \times 10^5$), inducing a severe Courant-Friedrichs-Lewy (CFL) stiffness catastrophe that freezes isotropic Euler-Lagrange dynamics.
-(3) Non-layered architectures---specifically continuous spatial wave fields and coupled recurrent graphs---compress this condition number by up to $6,140\times$ ($\kappa \approx 23.1$), allowing un-preconditioned isotropic Euler-Lagrange optimization to converge directly to target boundaries. Code, datasets, and an interactive 60~FPS symplectic simulator are open-sourced.
+Standard deep learning optimization heuristics---such as stochastic gradient descent (SGD), Polyak heavy-ball momentum, and Nesterov acceleration---are conventionally formulated as discrete update maps. In this paper, we elevate parameter optimization to continuous variational mechanics governed by Hamilton's Principle of Stationary Action over configuration trajectories $\theta(t) \in \mathbb{R}^D$: $S[\theta] = \int_0^T \mathcal{L}(\theta, \dot{\theta}, t) \, dt$. We establish three primary theoretical and empirical discoveries: (1) Momentum, Nesterov acceleration, and gradient clipping are exact physical manifestations of Euclidean mass, Bregman Lagrangian criticality ($\gamma(t)=3/t$), and Lorentz-invariant relativistic velocity clamping ($\|\dot{\theta}\| < c$). Under relativistic kinetic energy $T = -mc^2\sqrt{1-\|\dot{\theta}\|^2/c^2}$, parameter velocity is strictly bounded below $c$, eliminating momentum overshoot on steep cliffs and attaining machine-precision convergence ($1.67 \times 10^{-20}$) on non-convex landscapes where standard SGD stalls at $1.95 \times 10^{-1}$. (2) Deep feedforward networks exhibit an exponential block-hierarchical Hessian condition gap ($\kappa \approx 1.42 \times 10^5$), inducing a severe Courant-Friedrichs-Lewy (CFL) stiffness catastrophe that freezes isotropic Euler-Lagrange dynamics. (3) Non-layered architectures---specifically continuous spatial wave fields and coupled recurrent graphs---compress this condition number by up to $6,140\times$ ($\kappa \approx 23.1$), allowing un-preconditioned isotropic Euler-Lagrange optimization to converge directly to target boundaries. Code, datasets, and an interactive 60~FPS symplectic simulator are open-sourced.
 \end{abstract}
 
 \section{Introduction}
@@ -49,7 +43,7 @@ In this work, we treat neural network parameters $\theta(t)$ as generalized coor
     \item \textbf{Non-Layered Spectral Remedy:} We demonstrate that continuous wave superposition fields (0 hidden layers) and coupled recurrent graphs compress this condition number by over three orders of magnitude, allowing isotropic variational mechanics to converge effortlessly.
 \end{itemize}
 
-\section{Variational Mechanics in Parameter Space}
+\section{Variational Mechanics}
 
 \subsection{Hamilton's Principle and Dissipation}
 
@@ -112,7 +106,7 @@ On a curved statistical manifold with metric tensor $G(\theta)$ (e.g., Fisher In
     G(\theta)\ddot{\theta} + \Gamma(\theta)(\dot{\theta}, \dot{\theta}) + \gamma \dot{\theta} + \nabla L(\theta) = 0
 \end{equation}
 
-\subsection{Symplectic Phase-Space Discretization}
+\subsection{Symplectic Phase-Space Integration}
 
 Discretizing second-order parameter dynamics requires canonical phase space $(\theta, p)$ preserving the differential 2-form $\omega = d\theta \wedge dp$ \cite{hairer2006geometric}.
 \begin{lemma}
@@ -127,7 +121,7 @@ In contrast, Semi-Implicit Symplectic Euler:
 \end{equation}
 and the second-order St\"ormer-Verlet integrator satisfy $\det(J) \equiv 1.0$, guaranteeing bounded shadow Hamiltonian orbits over arbitrary horizons.
 
-% --- FIGURE 1 ---
+% --- FIGURE 1 (FULL WIDTH) ---
 \begin{figure*}[t]
 \centering
 \includegraphics[width=\textwidth]{figures/figure1_rosenbrock_trajectories_and_loss.png}
@@ -152,7 +146,7 @@ The global Hessian $\nabla^2_\theta L \in \mathbb{R}^{D \times D}$ exhibits a bl
     \frac{\lambda_{\max}(H_{LL})}{\lambda_{\min}(H_{11})} \sim \mathcal{O}(e^{2L})
 \end{equation}
 
-\subsection{Mode Decomposition and CFL Stability Ceilings}
+\subsection{Modal CFL Stability Bounds}
 
 Decoupling the damped oscillator $m \ddot{\theta} + \gamma \dot{\theta} + \nabla^2 L \cdot \theta = 0$ along Hessian eigenvectors reveals that each normal mode $i$ oscillates with natural frequency:
 \begin{equation}
@@ -168,7 +162,7 @@ Under this forced micro-step, the slowest mode $\omega_{\min} = \sqrt{\lambda_{\
 \end{equation}
 When depth causes $\kappa \sim 10^5$, $N_{\text{cycle}} \approx 1,000$ steps are required to complete a single oscillation. Early layers freeze, and isotropic Euler-Lagrange optimization collapses.
 
-% --- FIGURE 2 ---
+% --- FIGURE 2 (FULL WIDTH) ---
 \begin{figure*}[t]
 \centering
 \includegraphics[width=\textwidth]{figures/figure2_layered_vs_nonlayered_dynamics.png}
@@ -176,59 +170,69 @@ When depth causes $\kappa \sim 10^5$, $N_{\text{cycle}} \approx 1,000$ steps are
 \label{fig:architectures}
 \end{figure*}
 
-\subsection{Spectral Compression via Non-Layered Architectures}
+\subsection{Spectral Remedy in Non-Layered Networks}
 
 We propose circumventing the CFL catastrophe by replacing hierarchical layers with flat or coupled continuous dynamical topologies:
 
-\paragraph{1. Continuous Wave Interference Fields (0 Hidden Layers).}
+\paragraph{1. Continuous Wave Fields (0 Hidden Layers).}
 \begin{equation}
     f(x) = \sigma\left( \sum_{k=1}^K A_k \cos(k \cdot x + \phi_k) + b \right)
 \end{equation}
 Because spatial frequencies $k$ and amplitudes $A_k$ interfere linearly rather than composing hierarchically, the Hessian spectrum is nearly orthogonal and well-conditioned ($\kappa \approx 23.1$).
 
-\paragraph{2. Continuous-Time Recurrent Graphs (CTRNN).}
+\paragraph{2. Continuous Recurrent Graphs (CTRNN).}
 \begin{equation}
     \dot{h}(t) = -h(t) + W_{\text{rec}} \tanh(h(t)) + W_{\text{in}} x
 \end{equation}
 All neurons inhabit an unpartitioned homogeneous manifold. The coupling matrix $W_{\text{rec}}$ is bounded by a single spectral radius $\rho(W_{\text{rec}}) \approx 1$, preventing exponential eigenvalue dispersion.
-
-% --- TABLE 1 ---
-\begin{table}[b]
-\centering
-\small
-\caption{\textbf{Rosenbrock Ravine Optimization Benchmark} (1,500 Steps from $(-1.5, 2.0)$ to $(1.0, 1.0)$).}
-\vspace{2mm}
-\begin{tabular}{lccc}
-\hline\hline
-\textbf{Method} & \textbf{Final Position} & \textbf{Final Loss} & \textbf{Target Error} \\
-\hline
-Standard SGD & $(0.559, 0.310)$ & $1.954 \times 10^{-1}$ & $0.8124$ \\
-Bregman E-L ($3/t$) & $(0.983, 0.965)$ & $3.242 \times 10^{-4}$ & $0.0385$ \\
-St\"ormer-Verlet & $(1.000, 1.000)$ & $1.186 \times 10^{-11}$ & $2.23 \times 10^{-6}$ \\
-Heavy Ball E-L & $(1.000, 1.000)$ & $9.638 \times 10^{-14}$ & $3.10 \times 10^{-7}$ \\
-\textbf{Relativistic E-L} & $\mathbf{(1.000, 1.000)}$ & $\mathbf{1.669 \times 10^{-20}}$ & $\mathbf{4.08 \times 10^{-10}}$ \\
-\hline\hline
-\end{tabular}
-\label{tab:rosenbrock}
-\end{table}
 
 \section{Empirical Evaluation}
 
 \subsection{Rosenbrock Ravine Benchmark}
 
 We benchmarked five optimizers on the Rosenbrock banana surface $f(x, y) = (1-x)^2 + 100(y-x^2)^2$ from $(-1.5, 2.0)$ for 1,500 steps. As detailed in Table~\ref{tab:rosenbrock} and Figure~\ref{fig:rosenbrock}:
+
+% --- TABLE 1 (RESIZED TO FIT EXACT COLUMNWIDTH) ---
+\begin{table}[h!]
+\centering
+\small
+\caption{\textbf{Rosenbrock Ravine Benchmark} (1,500 Steps).}
+\vspace{2mm}
+\resizebox{\columnwidth}{!}{%
+\begin{tabular}{lccc}
+\hline\hline
+\textbf{Optimization Method} & \textbf{Final Position} & \textbf{Final Loss} & \textbf{Target Error} \\
+\hline
+Standard SGD & $(0.559, 0.310)$ & $1.954 \times 10^{-1}$ & $0.8124$ \\
+Bregman E-L ($3/t$) & $(0.983, 0.965)$ & $3.242 \times 10^{-4}$ & $0.0385$ \\
+St\"ormer-Verlet Symplectic & $(1.000, 1.000)$ & $1.186 \times 10^{-11}$ & $2.23 \times 10^{-6}$ \\
+Polyak Heavy Ball E-L & $(1.000, 1.000)$ & $9.638 \times 10^{-14}$ & $3.10 \times 10^{-7}$ \\
+\textbf{Relativistic E-L} & $\mathbf{(1.000, 1.000)}$ & $\mathbf{1.669 \times 10^{-20}}$ & $\mathbf{4.08 \times 10^{-10}}$ \\
+\hline\hline
+\end{tabular}%
+}
+\label{tab:rosenbrock}
+\end{table}
+
 \begin{itemize}
     \item \textbf{Standard SGD} stalled at $(0.559, 0.310)$ with loss $0.1954$, unable to navigate the curved parabolic floor without inertia.
     \item \textbf{Polyak Heavy Ball} reached $9.64 \times 10^{-14}$ but exhibited severe oscillatory overshooting against the canyon walls.
     \item \textbf{Relativistic Euler-Lagrange} ($c=5.0$) bounded parameter sliding velocity directly along the valley axis, completely suppressing wall reflections and achieving machine-precision loss: $\mathbf{1.669 \times 10^{-20}}$.
 \end{itemize}
 
-% --- TABLE 2 ---
-\begin{table}[t]
+\newpage
+
+\subsection{Architecture Spectrum Benchmark}
+
+We trained three distinct architectures on a non-linear concentric ring classification dataset under pure isotropic Symplectic Euler-Lagrange ($m=1.0$, fixed damping, zero adaptive coordinate rescaling). Results are summarized in Table~\ref{tab:architectures} and Figure~\ref{fig:architectures}:
+
+% --- TABLE 2 (RESIZED TO FIT EXACT COLUMNWIDTH) ---
+\begin{table}[h!]
 \centering
 \small
-\caption{\textbf{Architecture Conditioning and Training Dynamics} (Concentric Rings, 400 Epochs, Isotropic $m=1.0$).}
+\caption{\textbf{Architecture Conditioning and Dynamics} (400 Epochs).}
 \vspace{2mm}
+\resizebox{\columnwidth}{!}{%
 \begin{tabular}{lccc}
 \hline\hline
 \textbf{Architecture} & \textbf{Isotropic E-L} & \textbf{Adam} & \textbf{Condition $\kappa$} \\
@@ -237,32 +241,33 @@ Layered MLP (Depth 3) & $0.628461$ & $0.016529$ & $\mathbf{1.42 \times 10^5}$ \\
 Non-Layered Graph & $0.373615$ & $0.004488$ & $\mathbf{4.83 \times 10^2}$ \\
 \textbf{Wave Field (0-Layer)} & $\mathbf{0.076311}$ & $0.033675$ & $\mathbf{2.31 \times 10^1}$ \\
 \hline\hline
-\end{tabular}
+\end{tabular}%
+}
 \label{tab:architectures}
 \end{table}
 
-\subsection{Neural Architecture Spectrum Benchmark}
-
-We trained three distinct architectures on a non-linear concentric ring classification dataset under pure isotropic Symplectic Euler-Lagrange ($m=1.0$, fixed damping, zero adaptive coordinate rescaling).
-
-Results in Table~\ref{tab:architectures} and Figure~\ref{fig:architectures} demonstrate:
 \begin{itemize}
     \item The \textbf{Layered MLP} choked at BCE loss $0.6285$ (random guess $\approx 0.693$) due to its condition gap $\kappa \approx 1.42 \times 10^5$.
     \item The \textbf{Continuous Recurrent Graph} lowered loss to $0.3736$ with $\kappa \approx 4.83 \times 10^2$.
     \item The \textbf{Continuous Wave Field} converged directly to $\mathbf{0.0763}$ with a tightly conditioned spectrum ($\kappa \approx 23.1$), proving that isotropic variational optimization succeeds once depth hierarchy is eliminated.
 \end{itemize}
 
-% --- FIGURE 3 ---
-\begin{figure}[t]
-\centering
-\includegraphics[width=\columnwidth]{figures/figure3_symplectic_vs_explicit_hamiltonian.png}
-\caption{\textbf{Symplectic vs.\ Explicit Euler Phase Dynamics.} (A) Phase portrait $(q, v)$: Symplectic Euler preserves invariant tori while Explicit Euler spirals outward. (B) Total energy conservation: Symplectic Euler bounds energy drift to $\Delta E < 10^{-2}$, whereas Explicit Euler diverges exponentially.}
-\label{fig:symplectic}
-\end{figure}
+\newpage
 
 \subsection{Symplectic Volume Conservation}
 
 To evaluate integration stability, we simulated conservative quartic potential parameter dynamics $V(\theta) = \frac{1}{2}\theta^2 + \frac{1}{4}\theta^4$. As shown in Figure~\ref{fig:symplectic}, Explicit Euler undergoes exponential energy blowup ($\Delta E \to \infty$) within 200 steps due to $\det(J) > 1$. Symplectic Euler preserves phase-space volume $\omega = d\theta \wedge dp$, restricting energy oscillations to bounded shadow Hamiltonian fluctuations ($\Delta E < 0.01$).
+
+% --- FIGURE 3 ---
+\begin{figure}[h!]
+\centering
+\vspace{-2mm}
+\includegraphics[width=0.76\columnwidth]{figures/figure3_symplectic_vs_explicit_hamiltonian.png}
+\vspace{-2mm}
+\caption{\textbf{Symplectic vs.\ Explicit Euler Dynamics.} (A) Phase portrait $(q, v)$: Symplectic Euler preserves invariant tori while Explicit Euler spirals outward. (B) Symplectic Euler bounds energy drift to $\Delta E < 10^{-2}$; Explicit Euler diverges exponentially.}
+\vspace{-2mm}
+\label{fig:symplectic}
+\end{figure}
 
 \section{Discussion and Related Work}
 
