@@ -342,6 +342,7 @@
         <button id="btnTogglePlay" class="btn-primary">Pause</button>
         <button id="btnStepFwd">Step (+1)</button>
         <button id="btnResetAll">Reset</button>
+        <button id="btnClearScreen" title="Clear all trajectory lines and telemetry charts (Hotkey: C)">Clear Screen</button>
       </div>
       <div class="tool-item">
         <span style="color:var(--text-dim);">Playback:</span>
@@ -736,41 +737,47 @@ function renderPaths() {
   optimizers.forEach(opt => {
     if (!opt.visible) return;
     const p = particles[opt.id];
+    if (!p) return;
     const path = p.path;
-    if (path.length < 2) return;
 
     ctx.save();
-    ctx.strokeStyle = opt.color;
-    ctx.lineWidth = 2.0;
-    ctx.beginPath();
-    ctx.moveTo(toScreenX(path[0][0]), toScreenY(path[0][1]));
-    for (let i = 1; i < path.length; i++) {
-      ctx.lineTo(toScreenX(path[i][0]), toScreenY(path[i][1]));
+    // Draw trail line if multiple points exist
+    if (path.length >= 2) {
+      ctx.strokeStyle = opt.color;
+      ctx.lineWidth = 2.0;
+      ctx.beginPath();
+      ctx.moveTo(toScreenX(path[0][0]), toScreenY(path[0][1]));
+      for (let i = 1; i < path.length; i++) {
+        ctx.lineTo(toScreenX(path[i][0]), toScreenY(path[i][1]));
+      }
+      ctx.stroke();
     }
-    ctx.stroke();
 
     // Particle Head with Concentric Glow
-    const hx = toScreenX(p.x);
-    const hy = toScreenY(p.y);
+    if (path.length >= 1) {
+      const hx = toScreenX(p.x);
+      const hy = toScreenY(p.y);
 
-    ctx.shadowColor = opt.color;
-    ctx.shadowBlur = 8;
-    ctx.fillStyle = opt.color;
-    ctx.beginPath(); ctx.arc(hx, hy, 4, 0, Math.PI * 2); ctx.fill();
+      ctx.shadowColor = opt.color;
+      ctx.shadowBlur = 8;
+      ctx.fillStyle = opt.color;
+      ctx.beginPath(); ctx.arc(hx, hy, 4, 0, Math.PI * 2); ctx.fill();
 
-    ctx.shadowBlur = 0;
-    ctx.strokeStyle = '#ffffff';
-    ctx.lineWidth = 1.2;
-    ctx.stroke();
+      ctx.shadowBlur = 0;
+      ctx.strokeStyle = '#ffffff';
+      ctx.lineWidth = 1.2;
+      ctx.stroke();
 
-    // Velocity Vector
-    ctx.strokeStyle = opt.color;
-    ctx.lineWidth = 1.5;
-    ctx.beginPath();
-    ctx.moveTo(hx, hy);
-    ctx.lineTo(hx + p.vx * 3.5, hy - p.vy * 3.5);
-    ctx.stroke();
-
+      // Velocity Vector
+      if (Math.hypot(p.vx, p.vy) > 1e-4) {
+        ctx.strokeStyle = opt.color;
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        ctx.moveTo(hx, hy);
+        ctx.lineTo(hx + p.vx * 3.5, hy - p.vy * 3.5);
+        ctx.stroke();
+      }
+    }
     ctx.restore();
   });
 }
@@ -931,6 +938,42 @@ document.getElementById('btnStepFwd').onclick = () => {
 document.getElementById('btnResetAll').onclick = () => {
   resetSimulation();
 };
+
+function clearScreen() {
+  step = 0;
+  optimizers.forEach(opt => {
+    if (particles[opt.id]) {
+      particles[opt.id].path = [[particles[opt.id].x, particles[opt.id].y]];
+      particles[opt.id].vx = 0;
+      particles[opt.id].vy = 0;
+      if (particles[opt.id].px !== undefined) {
+        particles[opt.id].px = 0;
+        particles[opt.id].py = 0;
+      }
+    }
+    historyLoss[opt.id] = [];
+    historyVelocity[opt.id] = [];
+  });
+  renderPaths();
+  renderPlot('chartLoss', historyLoss, true);
+  renderPlot('chartVelocity', historyVelocity, false, paramC);
+  updateTable();
+  document.getElementById('stepDisplay').innerText = `Step: 0 / 1500`;
+  document.getElementById('hudText').innerHTML = `&bull; <b>Screen Cleared.</b> Ready for new trajectory deploy.`;
+}
+
+document.getElementById('btnClearScreen').onclick = () => {
+  clearScreen();
+};
+
+window.addEventListener('keydown', (e) => {
+  if (e.key === 'c' || e.key === 'C') {
+    clearScreen();
+  } else if (e.key === ' ') {
+    e.preventDefault();
+    document.getElementById('btnTogglePlay').click();
+  }
+});
 
 document.querySelectorAll('.btn-speed').forEach(btn => {
   btn.onclick = () => {
