@@ -1,5 +1,6 @@
 # Euler-Lagrange Neural Optimizer
 
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.24011081.svg)](https://doi.org/10.5281/zenodo.24011081)
 [![Python](https://img.shields.io/badge/Python-3.9%20%7C%203.10%20%7C%203.11%20%7C%203.12%20%7C%203.13-blue.svg)](https://www.python.org/)
 [![PyTorch](https://img.shields.io/badge/PyTorch-2.0%2B-red.svg)](https://pytorch.org/)
 [![Physics](https://img.shields.io/badge/Variational-Stationary%20Action-purple.svg)]()
@@ -178,6 +179,24 @@ euler-lagrange-neural-optimizer/
 
 ---
 
-## 6. License
+## 6. Citation
 
-MIT License. Copyright (c) 2026 shu195.
+If you use this work, theoretical derivations, or code in your research, please cite the preprint:
+
+```bibtex
+@article{barmase2026variational,
+  title={Variational Parameter Dynamics: The Courant-Friedrichs-Lewy Depth Catastrophe and Relativistic Momentum in Neural Networks},
+  author={Barmase, Shubham},
+  year={2026},
+  month={November},
+  doi={10.5281/zenodo.24011081},
+  url={https://doi.org/10.5281/zenodo.24011081},
+  publisher={Zenodo}
+}
+```
+
+---
+
+## 7. License
+
+MIT License. Copyright (c) 2026 Shubham Barmase.
