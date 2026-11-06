@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Euler-Lagrange Parameter Dynamics Visualizer</title>
+<style>
+  :root {
+    --bg: #000000;
+    --card: #0d1117;
+    --border: #30363d;
+    --text: #c9d1d9;
+    --accent-green: #2ea043;
+    --accent-red: #f85149;
+    --accent-blue: #58a6ff;
+    --accent-orange: #f0883e;
+    --accent-purple: #bc8cff;
+  }
+  body {
+    margin: 0;
+    padding: 12px;
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, monospace;
+    font-size: 13px;
+  }
+  .container {
+    display: flex;
+    flex-direction: row;
+    gap: 12px;
+    align-items: flex-start;
+  }
+  .canvas-box {
+    position: relative;
+    background: #050505;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+  }
+  canvas {
+    display: block;
+  }
+  .controls {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    padding: 12px;
+    border-radius: 8px;
+  }
+  .title {
+    font-size: 14px;
+    font-weight: 700;
+    color: #ffffff;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+  }
+  .dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+  }
+  .metrics-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 11px;
+    margin-top: 6px;
+  }
+  .metrics-table th, .metrics-table td {
+    padding: 4px 6px;
+    border-bottom: 1px solid #21262d;
+    text-align: left;
+  }
+  .btn-group {
+    display: flex;
+    gap: 6px;
+    margin-top: 6px;
+  }
+  button {
+    background: #21262d;
+    color: #c9d1d9;
+    border: 1px solid var(--border);
+    padding: 6px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 11px;
+  }
+  button:hover {
+    background: #30363d;
+    color: #ffffff;
+  }
+  .slider-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 11px;
+  }
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="canvas-box">
+    <canvas id="simCanvas" width="440" height="420"></canvas>
+  </div>
+  <div class="controls">
+    <div class="title">
+      <span>Phase-Space Optimizer Dynamics</span>
+      <span style="font-size:11px; color:#8b949e;">Rosenbrock Landscape</span>
+    </div>
+    
+    <div class="legend-item"><span class="dot" style="background:var(--accent-red)"></span> <b>SGD (Aristotelian)</b>: <span id="loss-sgd">0.1954</span></div>
+    <div class="legend-item"><span class="dot" style="background:var(--accent-purple)"></span> <b>Heavy Ball E-L</b>: <span id="loss-hb">9.64e-14</span></div>
+    <div class="legend-item"><span class="dot" style="background:var(--accent-blue)"></span> <b>Bregman E-L (3/t)</b>: <span id="loss-br">3.24e-04</span></div>
+    <div class="legend-item"><span class="dot" style="background:var(--accent-orange)"></span> <b>Störmer-Verlet</b>: <span id="loss-sv">1.19e-11</span></div>
+    <div class="legend-item"><span class="dot" style="background:var(--accent-green)"></span> <b>Relativistic E-L</b>: <span id="loss-rel">1.67e-20</span></div>
+
+    <div class="btn-group">
+      <button id="btnReset">Reset Orbit</button>
+      <button id="btnPlay">Pause / Resume</button>
+    </div>
+
+    <div class="slider-row">
+      <span>Simulation Step: <b id="stepVal">0</b> / 1500</span>
+    </div>
+
+    <table class="metrics-table">
+      <thead>
+        <tr><th>Optimizer</th><th>Final Target Distance</th><th>Phase Area</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>SGD</td><td>0.812 (Stuck in Ravine)</td><td>N/A (Zero-mass)</td></tr>
+        <tr><td>Heavy Ball</td><td>0.000 (Exact)</td><td>Dissipating</td></tr>
+        <tr><td>Bregman</td><td>0.038 (Asymptotic)</td><td>Critical decay</td></tr>
+        <tr><td>Verlet</td><td>0.000 (Exact)</td><td>Strict Symplectic</td></tr>
+        <tr><td>Relativistic</td><td><b>0.000 (Exact)</b></td><td>Lorentz-Capped</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<script>
+const canvas = document.getElementById('simCanvas');
+const ctx = canvas.getContext('2d');
+const W = canvas.width, H = canvas.height;
+
+// Transform world coords [-1.8, 1.4] x [-0.5, 2.5] to canvas pixels
+function toX(x) { return ((x - (-1.8)) / (1.4 - (-1.8))) * W; }
+function toY(y) { return H - ((y - (-0.5)) / (2.5 - (-0.5))) * H; }
+
+function rosenbrock(x, y) { return (1.0 - x)**2 + 100.0 * (y - x*x)**2; }
+function gradR(x, y) {
+  return [ -2.0*(1.0-x) - 400.0*x*(y - x*x), 200.0*(y - x*x) ];
+}
+
+// Background contour cache
+const bgCanvas = document.createElement('canvas');
+bgCanvas.width = W; bgCanvas.height = H;
+const bgCtx = bgCanvas.getContext('2d');
+const imgData = bgCtx.createImageData(W, H);
+for (let py = 0; py < H; py++) {
+  const y = 2.5 - (py / H) * 3.0;
+  for (let px = 0; px < W; px++) {
+    const x = -1.8 + (px / W) * 3.2;
+    const z = rosenbrock(x, y);
+    const logZ = Math.log10(Math.max(0.1, z));
+    const norm = Math.min(1.0, Math.max(0.0, (logZ + 1.0) / 4.5));
+    const idx = (py * W + px) * 4;
+    imgData.data[idx] = Math.floor(norm * 35);
+    imgData.data[idx+1] = Math.floor(norm * 70);
+    imgData.data[idx+2] = Math.floor(norm * 110);
+    imgData.data[idx+3] = 255;
+  }
+}
+bgCtx.putImageData(imgData, 0, 0);
+
+// Target and Start markers
+bgCtx.fillStyle = '#f85149';
+bgCtx.beginPath();
+bgCtx.arc(toX(1.0), toY(1.0), 6, 0, Math.PI * 2);
+bgCtx.fill();
+bgCtx.fillStyle = '#ffffff';
+bgCtx.font = '10px monospace';
+bgCtx.fillText("Global Min (1,1)", toX(1.0) + 8, toY(1.0) - 4);
+
+let step = 0;
+let running = true;
+
+// Optimizers State
+const initX = -1.5, initY = 2.0;
+let s_sgd = { x: initX, y: initY, path: [[initX, initY]] };
+let s_hb = { x: initX, y: initY, vx: 0, vy: 0, path: [[initX, initY]] };
+let s_br = { x: initX, y: initY, vx: 0, vy: 0, path: [[initX, initY]] };
+let s_sv = { x: initX, y: initY, vx: 0, vy: 0, path: [[initX, initY]] };
+let s_rel = { x: initX, y: initY, px: 0, py: 0, path: [[initX, initY]] };
+
+function resetSim() {
+  step = 0;
+  s_sgd = { x: initX, y: initY, path: [[initX, initY]] };
+  s_hb = { x: initX, y: initY, vx: 0, vy: 0, path: [[initX, initY]] };
+  s_br = { x: initX, y: initY, vx: 0, vy: 0, path: [[initX, initY]] };
+  s_sv = { x: initX, y: initY, vx: 0, vy: 0, path: [[initX, initY]] };
+  s_rel = { x: initX, y: initY, px: 0, py: 0, path: [[initX, initY]] };
+}
+
+function updatePhysics() {
+  if (step >= 1500) return;
+  const lr = 0.001;
+  const dt = lr * 20.0;
+
+  // 1. SGD
+  let g = gradR(s_sgd.x, s_sgd.y);
+  s_sgd.x -= lr * Math.max(-1e3, Math.min(1e3, g[0]));
+  s_sgd.y -= lr * Math.max(-1e3, Math.min(1e3, g[1]));
+  s_sgd.path.push([s_sgd.x, s_sgd.y]);
+
+  // 2. Heavy Ball
+  g = gradR(s_hb.x, s_hb.y);
+  const gamma_hb = 0.8;
+  s_hb.vx = (1.0 - gamma_hb * dt) * s_hb.vx - dt * g[0];
+  s_hb.vy = (1.0 - gamma_hb * dt) * s_hb.vy - dt * g[1];
+  s_hb.x += dt * s_hb.vx;
+  s_hb.y += dt * s_hb.vy;
+  s_hb.path.push([s_hb.x, s_hb.y]);
+
+  // 3. Bregman 3/t
+  g = gradR(s_br.x, s_br.y);
+  const gamma_t = 3.0 / (step * dt + 1.0);
+  s_br.vx = (1.0 - gamma_t * dt) * s_br.vx - dt * g[0];
+  s_br.vy = (1.0 - gamma_t * dt) * s_br.vy - dt * g[1];
+  s_br.x += dt * s_br.vx;
+  s_br.y += dt * s_br.vy;
+  s_br.path.push([s_br.x, s_br.y]);
+
+  // 4. Störmer-Verlet
+  const dt_sv = lr * 15.0;
+  const g_k = gradR(s_sv.x, s_sv.y);
+  const next_x = s_sv.x + dt_sv * s_sv.vx - 0.5 * dt_sv * dt_sv * g_k[0];
+  const next_y = s_sv.y + dt_sv * s_sv.vy - 0.5 * dt_sv * dt_sv * g_k[1];
+  const g_k1 = gradR(next_x, next_y);
+  s_sv.vx = Math.exp(-dt_sv) * s_sv.vx - 0.5 * dt_sv * (g_k[0] + g_k1[0]);
+  s_sv.vy = Math.exp(-dt_sv) * s_sv.vy - 0.5 * dt_sv * (g_k[1] + g_k1[1]);
+  s_sv.x = next_x; s_sv.y = next_y;
+  s_sv.path.push([s_sv.x, s_sv.y]);
+
+  // 5. Relativistic EL
+  g = gradR(s_rel.x, s_rel.y);
+  const c = 5.0;
+  const pNorm = Math.hypot(s_rel.px, s_rel.py);
+  const lorentz = 1.0 / Math.sqrt(1.0 + (pNorm/c)*(pNorm/c));
+  const vx = s_rel.px * lorentz, vy = s_rel.py * lorentz;
+  s_rel.px -= dt * (g[0] + 1.2 * vx);
+  s_rel.py -= dt * (g[1] + 1.2 * vy);
+  const pNorm2 = Math.hypot(s_rel.px, s_rel.py);
+  const lorentz2 = 1.0 / Math.sqrt(1.0 + (pNorm2/c)*(pNorm2/c));
+  s_rel.x += dt * s_rel.px * lorentz2;
+  s_rel.y += dt * s_rel.py * lorentz2;
+  s_rel.path.push([s_rel.x, s_rel.y]);
+
+  step++;
+}
+
+function drawPath(path, color, isDashed) {
+  if (path.length < 2) return;
+  ctx.save();
+  ctx.strokeStyle = color;
+  ctx.lineWidth = 2.0;
+  if (isDashed) ctx.setLineDash([4, 4]);
+  ctx.beginPath();
+  ctx.moveTo(toX(path[0][0]), toY(path[0][1]));
+  for (let i = 1; i < path.length; i++) {
+    ctx.lineTo(toX(path[i][0]), toY(path[i][1]));
+  }
+  ctx.stroke();
+  ctx.restore();
+}
+
+function render() {
+  if (running) {
+    for (let i = 0; i < 4; i++) updatePhysics();
+  }
+
+  ctx.drawImage(bgCanvas, 0, 0);
+
+  // Draw paths
+  drawPath(s_sgd.path, '#f85149', true);
+  drawPath(s_hb.path, '#bc8cff', false);
+  drawPath(s_br.path, '#58a6ff', false);
+  drawPath(s_sv.path, '#f0883e', true);
+  drawPath(s_rel.path, '#2ea043', false);
+
+  // Draw active heads
+  function drawHead(x, y, color) {
+    ctx.fillStyle = color;
+    ctx.beginPath();
+    ctx.arc(toX(x), toY(y), 4.5, 0, Math.PI*2);
+    ctx.fill();
+    ctx.strokeStyle = '#ffffff';
+    ctx.lineWidth = 1.0;
+    ctx.stroke();
+  }
+  drawHead(s_sgd.x, s_sgd.y, '#f85149');
+  drawHead(s_hb.x, s_hb.y, '#bc8cff');
+  drawHead(s_br.x, s_br.y, '#58a6ff');
+  drawHead(s_sv.x, s_sv.y, '#f0883e');
+  drawHead(s_rel.x, s_rel.y, '#2ea043');
+
+  document.getElementById('stepVal').innerText = step;
+  requestAnimationFrame(render);
+}
+
+document.getElementById('btnReset').onclick = resetSim;
+document.getElementById('btnPlay').onclick = () => { running = !running; };
+
+render();
+</script>
+</body>
+</html>
