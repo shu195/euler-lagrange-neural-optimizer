@@ -34,3 +34,4 @@ ENV/
 *.synctex.gz
 paper/rendered_pages/
 context.md
+GEMINI.md
