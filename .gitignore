@@ -33,3 +33,4 @@ ENV/
 *.out
 *.synctex.gz
 paper/rendered_pages/
+context.md
